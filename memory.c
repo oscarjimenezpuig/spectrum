@@ -2,23 +2,20 @@
 ============================================================
   Fichero: memory.c
    mreado: 01-10-2025
-  Ultima Modificacion: jue 02 oct 2025 12:23:16
+  Ultima Modificacion: dijous, 2 d’octubre de 2025, 20:30:20
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
 
-#include <stdio.h>
+#include <stdio.h> //dbg
 
 #include "xvideo.h"
 #include "memory.h"
 
-#define COLORS 16
 #define PIXDIM 4
 #define BLCDIM (PIXDIM*8)
 
-byte memory[MEMORY];
-
-X_Color color[COLORS];
+static byte memory[MEMORY];
 
 static void asc_new(char c,byte* data) {
 	direction dir=OMEM+c*8;
@@ -127,6 +124,8 @@ static void asc_init() {
 	asc_new('~',DATA(0,20,40,0,0,0,0,0));
 }
 
+#undef DATA
+
 static void mem_init() {
 	//establecemos todos los pixeles en blanco
 	byte* p=memory+OPIX;
@@ -138,30 +137,45 @@ static void mem_init() {
 	asc_init();
 }
 
-static void scr_init() {
-	x_init(SCRPW*PIXDIM,SCRPH*PIXDIM);
-	for(int r=1;r<=2;r=r+1) {
-		double factor=0.5*(double)r;
-		for(int k=0;k<8;k++) {
-			double red=0;
-			double green=0;
-			double blue=0;
-			if(k & 1) red=factor;
-			if(k & 2) green=factor;
-			if(k & 4) blue=factor;
-			color[k+8*(r-1)]=x_color(red,green,blue);
-		}
+static void col_init_one(byte code) {
+	double factor=(code>=8)?1:.5;
+	byte col=code%8;
+	double red,green,blue;
+	red=green=blue=0;
+	if(col & 1) red=factor;
+	if(col & 2) green=factor;
+	if(col & 4) blue=factor;
+	unsigned long cocol=x_color(red,green,blue);
+	byte *ptr,*ini;
+	ptr=ini=memory+ODCL+(col+(code>=8)*8)*4;
+	while(ptr!=ini+4 && cocol>0) {
+		*ptr++=cocol%256;
+		cocol=cocol/256;
 	}
 }
 
-static void scr_end() {
-	atexit(x_end);
+static void col_init() {
+	for(byte n=0;n<COLORS;n++) col_init_one(n);
 }
 
-static X_Color col_get(byte b) {
-	byte bright=(b & 8)?1:0;
-	byte pos=b &(~8);
-	return color[pos+8*bright];
+static void scr_init() {
+	x_init(SCRPW*PIXDIM,SCRPH*PIXDIM);
+	col_init();
+}
+
+static unsigned long col_get(byte b) {
+	byte brg=(b & 8)?1:0;
+	byte col=b &(~8);
+	unsigned long color=0;
+	unsigned long factor=1;
+	byte *ptr,*ini;
+	ptr=ini=memory+ODCL+(col+8*brg)*4;
+	while(ptr!=ini+4) {
+		color+=factor*(*ptr);
+		ptr++;
+		factor*=256;
+	}
+	return color;
 }
 
 static void line_draw(byte val,X_Point p,X_Color col) {
@@ -188,14 +202,7 @@ static void blk_show(int f,int c) {
 	}
 }	
 
-void show() {
-	static byte init=0;
-	if(!init) {
-		mem_init();
-		scr_init();
-		scr_end();
-		init=1;
-	}
+static void show() {
 	for(int f=0;f<SCRBH;f++) {
 		for(int c=0;c<SCRBW;c++) {
 			blk_show(f,c);
@@ -208,14 +215,14 @@ static void ks_ins(KeySym val) {
 	byte* ptr=memory+OKEY;
 	while(ptr<memory+OKEY+DKEY && (*ptr!=0 || *(ptr+1)!=0)) ptr=ptr+2;
 	if(ptr!=memory+OKEY+DKEY) {
-		*ptr=val/256;
-		*(ptr+1)=val%256;
+		*ptr=val%256;
+		*(ptr+1)=val/256;
 	}
 }
 
 static void ks_era(KeySym val) {
-	byte p=val/256;
-	byte s=val%256;
+	byte p=val%256;
+	byte s=val/256;
 	byte* ptr=memory+OKEY;
 	while(ptr!=memory+OKEY+DKEY) {
 		if(*ptr==p && *(ptr+1)==s) {
@@ -225,7 +232,7 @@ static void ks_era(KeySym val) {
 	}
 }
 
-void inkey() {
+static void inkey() {
 	KeySym k;
 	int stat=0;
 	if((stat=x_inkey(&k))) {
@@ -234,36 +241,42 @@ void inkey() {
 	}
 }
 
+int main() {
+	mem_init();
+	scr_init();
+	while((memget(OFLG) & END_SIGN)==0) {
+		show();
+		inkey();
+		program();
+	};
+	x_end();
+}
+
 //prueba
 
 #include <stdio.h>
 
 void mem_prt() {
+	puts("Memory");
 	byte* ptr=memory;
 	while(ptr!=memory+MEMORY) printf("%03i   ",*ptr++);
+	puts("End Memory");
 }
 
-int main() {
-	show();
-	memset(0,28);
-	memset(1,50);
-	memset(2,113);
-	memset(3,240);
-	memset(4,112);
-	memset(5,112);
-	memset(6,16);
-	memset(7,15);
+void program() {
+	memset(OPIX+0,28);
+	memset(OPIX+1,50);
+	memset(OPIX+2,113);
+	memset(OPIX+3,240);
+	memset(OPIX+4,112);
+	memset(OPIX+5,112);
+	memset(OPIX+6,16);
+	memset(OPIX+7,15);
 	memset(OCOL,RINK|GINK|BINK|UINK|RBKG|UBKG);
 	for(int i=0;i<8;i++) {
-		memmov('A'*8+OMEM+i,16+i);
+		memmov('A'*8+OMEM+i,OPIX+16+i);
 	}
-	show();
-	while(memget(OKEY)==0 && memget(OKEY+1)==0) {
-		inkey();
-	}
-	return 0;
+	if(memget(OKEY)!=0 || memget(OKEY+1)!=0) memset(OFLG,END_SIGN);
+	mem_prt();
 }
-			
-
-	
 
