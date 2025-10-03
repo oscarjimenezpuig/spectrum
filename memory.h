@@ -2,12 +2,10 @@
 ============================================================
   Fichero: memory.h
   Creado: 01-10-2025
-  Ultima Modificacion: divendres, 3 d’octubre de 2025, 05:12:20
+  Ultima Modificacion: vie 03 oct 2025 12:02:55
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
-
-#include <stdlib.h>
 
 // NOTAS
 
@@ -51,8 +49,10 @@
 #define DMEM GDU*8 //dimension de la memoria de GDU
 #define OKEY (OMEM+DMEM) //inicio de la direccion donde se guardan las teclas
 #define DKEY (2*KEYS) //guarda el keysym de KEYS teclas
+#define ORAM (OKEY+DKEY) //origen de la memoria ram (libre)
+#define DRAM 2048 //dimension de la memoria ram
 
-#define MEMORY (DFLG + DDCL + DPIX+DCOL+DMEM+DKEY) //memoria total
+#define MEMORY (DFLG + DDCL + DPIX + DCOL + DMEM + DKEY + DRAM) //memoria total
 
 //memoria colores
 
@@ -69,17 +69,14 @@
 
 #define END_SIGN 1
 
-//funciones
-
-//funciones de memoria
-#define memset(D,B) if((D)<MEMORY) memory[(D)]=(B)
-#define memget(D) (((D)<(MEMORY))?memory[(D)]:0)
-#define memmov(O,D) memset((D),memget(O))
-
-//TIPOS
+//tipos
 
 typedef unsigned char byte;
 typedef unsigned short direction;
+
+//memory
+
+extern byte memory[MEMORY];
 
 //FUNCIONES
 

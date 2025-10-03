@@ -2,12 +2,10 @@
 ============================================================
   Fichero: memory.c
    mreado: 01-10-2025
-  Ultima Modificacion: divendres, 3 d’octubre de 2025, 05:32:48
+  Ultima Modificacion: vie 03 oct 2025 12:03:47
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
-
-#include <stdio.h> //dbg
 
 #include "xvideo.h"
 #include "memory.h"
@@ -15,7 +13,7 @@
 #define PIXDIM 4
 #define BLCDIM (PIXDIM*8)
 
-static byte memory[MEMORY];
+byte memory[MEMORY];
 
 static void asc_new(char c,byte* data) {
 	direction dir=OMEM+c*8;
@@ -178,44 +176,9 @@ static unsigned long col_get(byte b) {
 	return color;
 }
 
-/*
-static void line_draw(byte val,X_Point p,X_Color col) {
-	for(byte k=128;k>=1;k=k>>1) {
-		if(val & k) x_square(p,PIXDIM,col);
-		p.x+=PIXDIM;
-	}
-}
-
-static void blk_show(int f,int c) {
-	X_Point p={c*8*PIXDIM,f*8*PIXDIM};
-	byte cb=memget(OCOL+c+f*SCRBW);
-	//dibujo del fondo
-	X_Color cbkg=col_get((cb & (RBKG|GBKG|BBKG|UBKG))/RBKG);
-	x_square(p,BLCDIM,cbkg);
-	//dibujo del pixeles
-	X_Color cink=col_get(cb & (RINK|GINK|BINK|UINK));
-	byte *ptr,*ini;
-	ptr=ini=memory+(OPIX+(c+f*SCRBW)*8);
-	while(ptr!=ini+8) {
-		if(*ptr) line_draw(*ptr,p,cink);
-		ptr++;
-		p.y+=PIXDIM;
-	}
-}
-
-static void show() {
-	for(int f=0;f<SCRBH;f++) {
-		for(int c=0;c<SCRBW;c++) {
-			blk_show(f,c);
-		}
-	}
-	x_flush();
-}
-*/
-
 static void line_draw(X_Point p,byte val) {
-	int c=p.x/8;
-	int f=p.y/8;
+	int c=p.x/(8*PIXDIM);
+	int f=p.y/(8*PIXDIM);
 	byte ink=(memory[OCOL+c+f*SCRBW]) & (RINK|GINK|BINK|UINK);
 	X_Color col=col_get(ink);
 	for(byte k=128;k>=1;k=k>>1) {
@@ -232,7 +195,7 @@ static void pix_draw() {
 		if(*ptr) line_draw(pos,*ptr);
 		ptr++;
 		pos.x+=PIXDIM*8;
-		if(pos.x>=SCRPW) {
+		if(pos.x>=SCRPW*PIXDIM) {
 			pos.x=0;
 			pos.y+=PIXDIM;
 		}
@@ -244,11 +207,12 @@ static void bkg_draw() {
 	byte *ptr,*ini;
 	ptr=ini=memory+OCOL;
 	while(ptr!=ini+DCOL) {
-		byte bkg=*ptr & (RBKG|GBKG|BBKG|UBKG);
-		x_square(pos,BLCDIM,bkg);
+		byte bkg=(*ptr & (RBKG|GBKG|BBKG|UBKG))/16;
+		unsigned long col=col_get(bkg);
+		x_square(pos,BLCDIM,col);
 		ptr++;
 		pos.x+=BLCDIM;
-		if(pos.x>=SCRPW) {
+		if(pos.x>=SCRPW*PIXDIM) {
 			pos.x=0;
 			pos.y+=BLCDIM;
 		}
@@ -294,7 +258,7 @@ static void inkey() {
 int main() {
 	mem_init();
 	scr_init();
-	while((memget(OFLG) & END_SIGN)==0) {
+	while((memory[OFLG] & END_SIGN)==0) {
 		show();
 		inkey();
 		program();
@@ -302,31 +266,4 @@ int main() {
 	x_end();
 }
 
-//prueba
-
-#include <stdio.h>
-
-void mem_prt() {
-	puts("Memory");
-	byte* ptr=memory;
-	while(ptr!=memory+MEMORY) printf("%03i   ",*ptr++);
-	puts("End Memory");
-}
-
-void program() {
-	memset(OPIX+0,28);
-	memset(OPIX+1,50);
-	memset(OPIX+2,113);
-	memset(OPIX+3,240);
-	memset(OPIX+4,112);
-	memset(OPIX+5,112);
-	memset(OPIX+6,16);
-	memset(OPIX+7,15);
-	memset(OCOL,RINK|GINK|BINK|UINK|RBKG|UBKG);
-	for(int i=0;i<8;i++) {
-		memmov('A'*8+OMEM+i,OPIX+16+i);
-	}
-	if(memget(OKEY)!=0 || memget(OKEY+1)!=0) memset(OFLG,END_SIGN);
-	mem_prt();
-}
 
