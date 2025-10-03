@@ -2,7 +2,7 @@
 ============================================================
   Fichero: memory.h
   Creado: 01-10-2025
-  Ultima Modificacion: dijous, 2 d’octubre de 2025, 20:31:28
+  Ultima Modificacion: divendres, 3 d’octubre de 2025, 05:12:20
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -11,8 +11,7 @@
 
 // NOTAS
 
-//En el entorno de memoria de los pixeles, los 8 valores consecutivos representan
-//el bloque de dibujo
+//En el entorno de memoria de los pixeles se representa la pantalla por lineas
 //La formula para objtener una posicion de bloque (distribuidos en filas f y columnas c
 //es p = c + f*SCRBW
 //Almacenamiento de valores de mas de un byte en "little endian", de menos significativo a mas

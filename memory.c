@@ -2,7 +2,7 @@
 ============================================================
   Fichero: memory.c
    mreado: 01-10-2025
-  Ultima Modificacion: dijous, 2 d’octubre de 2025, 20:30:20
+  Ultima Modificacion: divendres, 3 d’octubre de 2025, 05:32:48
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -178,6 +178,7 @@ static unsigned long col_get(byte b) {
 	return color;
 }
 
+/*
 static void line_draw(byte val,X_Point p,X_Color col) {
 	for(byte k=128;k>=1;k=k>>1) {
 		if(val & k) x_square(p,PIXDIM,col);
@@ -200,7 +201,7 @@ static void blk_show(int f,int c) {
 		ptr++;
 		p.y+=PIXDIM;
 	}
-}	
+}
 
 static void show() {
 	for(int f=0;f<SCRBH;f++) {
@@ -208,6 +209,55 @@ static void show() {
 			blk_show(f,c);
 		}
 	}
+	x_flush();
+}
+*/
+
+static void line_draw(X_Point p,byte val) {
+	int c=p.x/8;
+	int f=p.y/8;
+	byte ink=(memory[OCOL+c+f*SCRBW]) & (RINK|GINK|BINK|UINK);
+	X_Color col=col_get(ink);
+	for(byte k=128;k>=1;k=k>>1) {
+		if(val & k) x_square(p,PIXDIM,col);
+		p.x+=PIXDIM;
+	}
+}
+
+static void pix_draw() {
+	byte *ptr,*ini;
+	ptr=ini=memory+OPIX;
+	X_Point pos={0,0};
+	while(ptr!=ini+DPIX) {
+		if(*ptr) line_draw(pos,*ptr);
+		ptr++;
+		pos.x+=PIXDIM*8;
+		if(pos.x>=SCRPW) {
+			pos.x=0;
+			pos.y+=PIXDIM;
+		}
+	}
+}
+
+static void bkg_draw() {
+	X_Point pos={0,0};
+	byte *ptr,*ini;
+	ptr=ini=memory+OCOL;
+	while(ptr!=ini+DCOL) {
+		byte bkg=*ptr & (RBKG|GBKG|BBKG|UBKG);
+		x_square(pos,BLCDIM,bkg);
+		ptr++;
+		pos.x+=BLCDIM;
+		if(pos.x>=SCRPW) {
+			pos.x=0;
+			pos.y+=BLCDIM;
+		}
+	}
+}
+
+static void show() {
+	bkg_draw();
+	pix_draw();
 	x_flush();
 }
 
