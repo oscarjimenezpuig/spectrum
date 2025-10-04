@@ -2,7 +2,7 @@
 ============================================================
   Fichero: memory.c
    mreado: 01-10-2025
-  Ultima Modificacion: vie 03 oct 2025 12:03:47
+  Ultima Modificacion: dissabte, 4 d’octubre de 2025, 09:23:41
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -225,24 +225,17 @@ static void show() {
 	x_flush();
 }
 
-static void ks_ins(KeySym val) {
+static void ks_ins(byte val) {
 	byte* ptr=memory+OKEY;
-	while(ptr<memory+OKEY+DKEY && (*ptr!=0 || *(ptr+1)!=0)) ptr=ptr+2;
-	if(ptr!=memory+OKEY+DKEY) {
-		*ptr=val%256;
-		*(ptr+1)=val/256;
-	}
+	while(ptr<memory+OKEY+DKEY && *ptr!=0) ptr++;
+	if(ptr!=memory+OKEY+DKEY) *ptr=val;
 }
 
-static void ks_era(KeySym val) {
-	byte p=val%256;
-	byte s=val/256;
+static void ks_era(byte val) {
 	byte* ptr=memory+OKEY;
 	while(ptr!=memory+OKEY+DKEY) {
-		if(*ptr==p && *(ptr+1)==s) {
-			*ptr=*(ptr+1)=0;
-		}
-		ptr=ptr+2;
+		if(*ptr==val) *ptr=0;
+		ptr++;
 	}
 }
 
@@ -250,7 +243,7 @@ static void inkey() {
 	KeySym k;
 	int stat=0;
 	if((stat=x_inkey(&k))) {
-		if(stat==1) ks_ins(k);
+		if(stat==1) ks_ins((byte)k);
 		else ks_era(k);
 	}
 }

@@ -2,7 +2,7 @@
 ============================================================
   Fichero: memory.h
   Creado: 01-10-2025
-  Ultima Modificacion: vie 03 oct 2025 12:02:55
+  Ultima Modificacion: dissabte, 4 d’octubre de 2025, 11:07:16
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -13,6 +13,8 @@
 //La formula para objtener una posicion de bloque (distribuidos en filas f y columnas c
 //es p = c + f*SCRBW
 //Almacenamiento de valores de mas de un byte en "little endian", de menos significativo a mas
+//Las teclas que se registraran como entrada solo seran todos los keysym que vayan desde 0 a 255
+
 
 //CONSTANTES
 
@@ -25,7 +27,7 @@
 
 //gdu
 
-#define GDU 128
+#define GDU 256
 
 //key
 
@@ -46,13 +48,15 @@
 #define OCOL (OPIX+DPIX) //origen de los colores
 #define DCOL (SCRBW*SCRBH) //dimension de los colores
 #define OMEM (OCOL+DCOL) //origen de la memoria de GDU
-#define DMEM GDU*8 //dimension de la memoria de GDU
+#define DMEM (GDU*8) //dimension de la memoria de GDU
 #define OKEY (OMEM+DMEM) //inicio de la direccion donde se guardan las teclas
-#define DKEY (2*KEYS) //guarda el keysym de KEYS teclas
-#define ORAM (OKEY+DKEY) //origen de la memoria ram (libre)
-#define DRAM 2048 //dimension de la memoria ram
+#define DKEY KEYS //guarda el keysym de KEYS teclas
+#define OROM (OKEY+DKEY) //origen de la memoria rom (no a disposicion de usuario)
+#define DROM 8 //dimension de la memoria rom
+#define ORAM (OROM+DROM) //origen de la memoria rom (no a disposicion de usuario)
+#define DRAM 1024 //dimension de la memoria rom
 
-#define MEMORY (DFLG + DDCL + DPIX + DCOL + DMEM + DKEY + DRAM) //memoria total
+#define MEMORY (DFLG + DDCL + DPIX + DCOL + DMEM + DKEY + + DROM + DRAM) //memoria total
 
 //memoria colores
 
@@ -68,6 +72,7 @@
 //flags
 
 #define END_SIGN 1
+#define BOL_FLAG 128 //bandera auxiliar para guardar valores booleanos
 
 //tipos
 
