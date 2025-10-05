@@ -2,7 +2,7 @@
 ============================================================
   Fichero: memory.h
   Creado: 01-10-2025
-  Ultima Modificacion: dissabte, 4 d’octubre de 2025, 11:07:16
+  Ultima Modificacion: dissabte, 4 d’octubre de 2025, 20:16:27
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -56,7 +56,7 @@
 #define ORAM (OROM+DROM) //origen de la memoria rom (no a disposicion de usuario)
 #define DRAM 1024 //dimension de la memoria rom
 
-#define MEMORY (DFLG + DDCL + DPIX + DCOL + DMEM + DKEY + + DROM + DRAM) //memoria total
+#define MEMORY (DFLG + DDCL + DPIX + DCOL + DMEM + DKEY + DROM + DRAM) //memoria total
 
 //memoria colores
 

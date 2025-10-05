@@ -2,7 +2,7 @@
 ============================================================
   Fichero: memory.c
    mreado: 01-10-2025
-  Ultima Modificacion: dissabte, 4 d’octubre de 2025, 09:23:41
+  Ultima Modificacion: dissabte, 4 d’octubre de 2025, 20:20:05
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -125,12 +125,9 @@ static void asc_init() {
 #undef DATA
 
 static void mem_init() {
-	//establecemos todos los pixeles en blanco
-	byte* p=memory+OPIX;
-	while(p!=memory+OPIX+DPIX) *p++=0;
-	//establecemos el color fondo blanco y paper negro en el color
-	p=memory+OCOL;
-	while(p!=memory+OCOL+DCOL) *p++=RBKG|GBKG|BBKG;
+	//establecemos toda la memoria a 0
+	byte* p=memory;
+	while(p!=memory+MEMORY) *p++=0;
 	//definicion de gdu, donde se colocaran las letras
 	asc_init();
 }
