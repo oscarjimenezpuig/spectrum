@@ -2,7 +2,7 @@
 ============================================================
   Fichero: memory.h
   Creado: 01-10-2025
-  Ultima Modificacion: dissabte, 4 d’octubre de 2025, 20:16:27
+  Ultima Modificacion: lun 06 oct 2025 11:25:55
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -27,7 +27,7 @@
 
 //gdu
 
-#define GDU 256
+#define GDUS 256
 
 //key
 
@@ -48,7 +48,7 @@
 #define OCOL (OPIX+DPIX) //origen de los colores
 #define DCOL (SCRBW*SCRBH) //dimension de los colores
 #define OMEM (OCOL+DCOL) //origen de la memoria de GDU
-#define DMEM (GDU*8) //dimension de la memoria de GDU
+#define DMEM (GDUS*8) //dimension de la memoria de GDU
 #define OKEY (OMEM+DMEM) //inicio de la direccion donde se guardan las teclas
 #define DKEY KEYS //guarda el keysym de KEYS teclas
 #define OROM (OKEY+DKEY) //origen de la memoria rom (no a disposicion de usuario)

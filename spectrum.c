@@ -2,7 +2,7 @@
 ============================================================
   Fichero: spectrum.c
   Creado: 03-10-2025
-  Ultima Modificacion: diumenge, 5 d’octubre de 2025, 19:35:16
+  Ultima Modificacion: lun 06 oct 2025 14:27:20
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -13,12 +13,12 @@
 #include <stdlib.h>
 #include <time.h>
 
-void s_attrsetall(byte place,attribute a) {
+void s_attrsetall(byte place,byte a) {
 	const byte BGT=RBKG|GBKG|BBKG|UBKG;
 	const byte FGT=RINK|GINK|BINK|UINK;
 	byte* dmc=memory+CLF;
-	byte todel=(place==INK)?FGT:BGT;
-	byte nval=(place==INK)?a.color|a.bright:(a.color|a.bright)<<4;
+	byte todel=(place==PINK)?FGT:BGT;
+	byte nval=(place==PINK)?a:a<<4;
 	for(byte n=0;n<2;n++) {
 		*dmc &= ~todel;
 		*dmc|=nval;
@@ -33,29 +33,26 @@ void s_attrsetall(byte place,attribute a) {
 	}
 }
 
-void s_attrset(byte place,attribute a) {
+void s_attrset(byte place,byte a) {
 	const byte BGT=RBKG|GBKG|BBKG|UBKG;
 	const byte FGT=RINK|GINK|BINK|UINK;
 	byte* p=memory+CLC;
-	byte todel=(place==INK)?FGT:BGT;
-	byte nval=(place==INK)?(a.color|a.bright):(a.color|a.bright)<<4;
+	byte todel=(place==PINK)?FGT:BGT;
+	byte nval=(place==PINK)?a:a<<4;
 	*p &= ~todel;
 	*p |= nval;
 }
 
-attribute s_attrget(byte place) {
-	attribute a;
+byte s_attrget(byte place) {
+	const byte BGT=RBKG|GBKG|BBKG|UBKG;
+	const byte FGT=RINK|GINK|BINK|UINK;
+	byte a=0;
 	byte* p=memory+ATF;
 	byte f=*p++;
 	byte c=*p;
 	byte* pc=memory+OCOL+c+f*SCRBW;
-	if(place==INK) {
-		a.color=*pc & (RINK|GINK|BINK);
-		a.bright=*pc & UINK;
-	} else {
-		a.color=(*pc & (RBKG|GBKG|BBKG))>>4;
-		a.bright=(*pc & UBKG)>>4;
-	}
+	if(place==PINK) a=*pc & FGT;
+	else a=(*pc & BGT)>>4;
 	return a;
 }		 	
 
@@ -75,6 +72,10 @@ void s_clear() {
 	p=memory+ATF;
 	*p++=0;
 	*p=0;
+}
+
+void s_mode(byte m) {
+	if(m<=(FLIPX|FLIPY|INVERSE)) memory[MOI]=m;
 }
 
 #define pos_mem_chr(C) (memory+OMEM+(C)*8) //devuelve un puntero donde esta el caracter
@@ -115,67 +116,62 @@ static void prt_c_norm(byte* pmc,byte* pmp) {
 	}
 }
 
-static void prt_c_flipx(byte* pmc,byte* pmp) {
-	pmp=pmp+7*SCRBW;
-	byte* pc=pmc;
+static void prt_swap(byte* a,byte* b) {
+	byte c=*b;
+	*b=*a;
+	*a=c;
+}
+
+static void prt_c_flipx(byte* pmp) {
 	byte* pp=pmp;
-	while(pc!=pmc+8) {
-		*pp=*pc;
-		pc++;
-		pp-=SCRBW;
+	byte* ppc=pmp+7*SCRBW;
+	for(byte n=0;n<5;n++) {
+		prt_swap(pp,ppc);
+		pp+=SCRBW;
+		ppc-=SCRBW;
 	}
 }
 
-static byte l_flipy(byte val) {
-	byte r=0;
-	for(unsigned short i=1;i<=128;i=i<<1) {
-		r|=(i & val)?(128/i):0;
+static void l_flipy(byte* l) {
+	for(unsigned short i=1;i<=8;i=i<<1) {
+		byte ci=128/i;
+		byte a=(i & *l);
+		byte b=(ci & *l);
+		*l&=~(a|b);
+		*l|=(a*ci)|b*i;
 	}
-	return r;
 }
 
-static void prt_c_flipy(byte* pmc,byte* pmp) {
-	 byte* pc=pmc;
+static void prt_c_flipy(byte* pmp) {
 	byte* pp=pmp;
-	while(pc!=pmc+8) {
-		*pp=l_flipy(*pc);
-		pc++;
+	for(byte n=0;n<8;n++) {
+		l_flipy(pp);
 		pp+=SCRBW;
 	}
 }
 
-static void prt_c_inverse(byte* pmc,byte* pmp) {
-	byte* pc=pmc;
+static void prt_c_inverse(byte* pmp) {
 	byte* pp=pmp;
-	while(pc!=pmc+8) {
-		*pp=~(*pc);
-		pc++;
+	for(byte n=0;n<8;n++) {
+		*pp=~(*pp);
 		pp+=SCRBW;
 	}
 }
 
-void s_print_c(byte c,byte m) {
+void s_print_c(byte c) {
 	prt_c_col();
 	byte* pc=pos_mem_chr(c);
 	byte* pm=pos_mem_cur_pix();
-	switch(m) {
-		case FLIPX:
-			prt_c_flipx(pc,pm);
-			break;
-		case FLIPY:
-			prt_c_flipy(pc,pm);
-			break;
-		case INVERSE:
-			prt_c_inverse(pc,pm);
-			break;
-		default:
-			prt_c_norm(pc,pm);
-			break;
-
-	}
+	prt_c_norm(pc,pm);
+	byte mm=memory[MOI];
+	if(mm & FLIPX) prt_c_flipx(pm);
+	if(mm & FLIPY) prt_c_flipy(pm);
+	if(mm & INVERSE) prt_c_inverse(pm);
 }
 
-void s_print_n(double n,byte m) {
+#undef pos_mem_chr
+
+void s_print_n(double n) {
 	char sn[24];
 	sprintf(sn,"%lf",n);
 	char* p=sn;
@@ -190,12 +186,12 @@ void s_print_n(double n,byte m) {
 		*p='\0';
 		p--;
 	}
-	s_print_s(sn,m);
+	s_print_s(sn);
 }
 
-void s_print_s(char* s,byte m) {
+void s_print_s(char* s) {
 	char* p=s;
-	while(*p!='\0') s_print_c(*p++,m);
+	while(*p!='\0') s_print_c(*p++);
 }
 
 byte s_inkey(char k) {
@@ -231,38 +227,3 @@ void s_pause(double s) {
 	clock_t lim=clock()+s*CLOCKS_PER_SEC;
 	while(clock()<lim);
 }
-
-//prueba
-/*
-#include "xvideo.h"
-
-void mem_prt() {
-	puts("Pixeles");
-	for(int n=OPIX;n<OPIX+DPIX;n++) {
-		printf("%03i ",memory[n]);
-	}
-	puts("Gdu");
-	for(int n=OMEM+128*8;n<OMEM+DMEM;n++) {
-		printf("%03i ",memory[n]);
-	}
-	puts("");
-}
-
-void program() {
-	static byte finish=0;
-	s_gdu(128,192,192,192,192,255,255,66,66);
-	s_attrsetall(PAPER,Attr(WHITE,NORMAL));
-	s_attrsetall(INK,Attr(BLACK,NORMAL));
-	s_at(3,1);
-	s_attrset(INK,Attr(RED,BRIGHT));
-	s_print_c(128,NORMAL);
-	if(s_inkey('s')) {
-		s_at(3,1);
-		s_print_c('A',INVERSE);
-		finish=1;
-	} else if(finish==1) {
-		pause(10);
-		stop;
-	}
-}
-*/

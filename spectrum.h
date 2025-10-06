@@ -2,7 +2,7 @@
 ============================================================
   Fichero: spectrum.h
   Creado: 01-10-2025
-  Ultima Modificacion: diumenge, 5 d’octubre de 2025, 12:21:26
+  Ultima Modificacion: lun 06 oct 2025 14:01:45
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -15,6 +15,7 @@
 #define ATC (ATF+1) //posicion del cursor columna
 #define CLF (ATC+1) //color guardado (background y foreground)
 #define CLC (CLF+1) //color guardado del cursor (una vez usado en impresion, desaparece por el valor de CLF)
+#define MOI (CLC+1) //guarda el modo de impresion
 
 // constante 0 (para todos los valores)
 
@@ -41,49 +42,59 @@
 
 // lugar del color
 
-#define INK 0 //color de los bits conectados
-#define PAPER 1 //color de los bits desconectados
+#define PINK 0 //color de los bits conectados
+#define PPAPER 1 //color de los bits desconectados
 
 // cabecera funciones
 
-#define poke(D,V) if ((D)<MEMORY) memory[D]=(V)  //asignar valor a posicion de memoria
-#define peek(D) ((D)<MEMORY)?memory[D]:0 //conseguir el valor de la posicion de memoria
-#define move(O,D) poke((D),peek((O))) //mover de una a otra posicion el valor
-#define stop (memory[OFLG]|=END_SIGN) //para la ejecucion del programa
-#define Attr(C,B) (attribute){(C),(B)} //define un atributo
-#define background(A) s_attrsetall(PAPER,A) //fondo de toda la pantalla
-#define foreground(A) s_attrsetall(INK,A) //tinta de toda la pantalla
-#define paper(A) s_attrset(PAPER,A) //paper de la proxima impresion
-#define ink(A) s_attrset(INK,A) //tinta de la proxima impresion
-#define attr(A) s_attrget(A) //se consigue donde los atributos de un sector particular
-#define locate(F,C) s_at((F),(C)) //coloca en la posicion dicha el cursor
-#define clear //limpia la pantalla (ver s_clear())
-#define printc(B,M) s_print_c((B),(M)) //impresion de un caracter (0 a 255), M es el modo de impresion (FLIPX,FLIPY,INVERSE)
-#define printn(N,M) s_print_n((N),(M)) //impresion de cualquier numero
-#define prints(S,M) s_print_s(S,(M)) //impresion de una cadena
-#define inkey(A) s_inkey(A) //devuelve si se ha tecleado cierta tecla (a-z,0-9,espacio)
-#define gdu(N,A,B,C,D,E,F,G,H) s_gdu((N),(A),(B),(C),(D),(E),(F),(G),(H)) //definicion de un grafico definido por el usuario
-#define randomize(A) s_randomize((A)) //introduce la semilla
-#define rnd(A,B) s_rnd((A),(B)) //da numero aleatorio del intervalo [A,B]
-#define pause(A) s_pause((A)) //pausa de un determinado tiempo
-								
-// tipos
+#define POKE(D,V) if ((D)<MEMORY) memory[D]=(V)  //asignar valor a posicion de memoria
+#define PEEK(D) ((D)<MEMORY)?memory[D]:0 //conseguir el valor de la posicion de memoria
+#define MOVE(O,D) poke((D),peek((O))) //mover de una a otra posicion el valor
+#define STOP (memory[OFLG]|=END_SIGN) //para la ejecucion del programa
+#define BACKGROUND(A) s_attrsetall(PPAPER,A) //fondo de toda la pantalla
+#define FOREGROUND(A) s_attrsetall(PINK,A) //tinta de toda la pantalla
+#define PAPER(A) s_attrset(PPAPER,A) //paper de la proxima impresion
+#define INK(A) s_attrset(PINK,A) //tinta de la proxima impresion
+#define ATTR(P) s_attrget(P) //se consigue donde los atributos de un sector particular
+#define MODE(M) s_mode((M)) //almacena el modo de impresion
+#define LOCATE(F,C) s_at((F),(C)) //coloca en la posicion dicha el cursor
+#define PRINTC(B) s_print_c((B)) //impresion de un caracter (0 a 255), M es el modo de impresion (FLIPX,FLIPY,INVERSE)
+#define PRINTN(N) s_print_n((N)) //impresion de cualquier numero
+#define PRINTS(S) s_print_s(S) //impresion de una cadena
+#define CLS s_clear() //limpia la pantalla (ver s_clear())
+#define INKEY(A) s_inkey(A) //devuelve si se ha tecleado cierta tecla (a-z,0-9,espacio)
+#define GDU(N,A,B,C,D,E,F,G,H) s_gdu((N),(A),(B),(C),(D),(E),(F),(G),(H)) //definicion de un grafico definido por el usuario
+#define RANDOMIZE(A) s_randomize((A)) //introduce la semilla
+#define RND(A,B) s_rnd((A),(B)) //da numero aleatorio del intervalo [A,B]
+#define PAUSE(A) s_pause((A)) //pausa de un determinado tiempo
+#define PROGRAM void program() { //inicio del procedimiento programa
+#define PROCEDURE(A) void A() { //inicio de un procedimiento
+#define END } //fin de cualquier procedimiento
+#define CALL(A) A() //llamada a cualquier procedimiento
+#define GOTO(A) goto label_##A //goto
+#define LABEL(A) label_##A##: //label de un goto
+#define NUMBER double //definicion de una variable tipo double
+#define BYTE byte //definicion de una variable tipo byte
+#define STRING char* //definicion de una variable tipo char
+#define IF(C) if(C) { //definicion de if
+#define ELSIF(C) } else if(C) {//else if
+#define ELSE } else { //else
+#define ENDIF } //final del if
+#define FOR(V,O,C,I) for(V=O;C;I) { //bucle for
+#define NEXT } //final del bucle for
 
-typedef struct {
-	byte color : 3;
-	byte bright : 4;
-} attribute;
+								
 
 // funciones
 
-void s_attrsetall(byte place,attribute a);
-//definicion de todo el fondo o tinta de la pantalla
+void s_attrsetall(byte place,byte a);
+//definicion de todo el fondo o tinta de la pantalla (a=color|bright)
 
-void s_attrset(byte place,attribute a);
-//definicion de fondo o tinta del siguiente sector de impriesion
+void s_attrset(byte place,byte a);
+//definicion de fondo o tinta del siguiente sector de impresion
 
-attribute s_attrget(byte place);
-//consigue el attributo de color y brillo segun el valor de place de attribute
+byte s_attrget(byte place);
+//consigue color|bright segun el valor de place de attribute
 
 void s_at(byte f,byte c);
 //pone la posicion del cursor en la fila y columna especificada
@@ -95,13 +106,16 @@ void s_clear();
 //todas las funciones print implican que las posiciones de at varian hasta detras de la
 //impresion
 
-void s_print_c(byte c,byte mode);
+void s_mode(byte m);
+//modo de impresion de caracter, numero o secuencia
+
+void s_print_c(byte c);
 //impresion de un caracter
 
-void s_print_n(double n,byte mode);
+void s_print_n(double n);
 //impresion de cualquier tipo de numero
 
-void s_print_s(char* s,byte mode);
+void s_print_s(char* s);
 //impresion de una cadena de caracteres
 
 byte s_inkey(char k);
