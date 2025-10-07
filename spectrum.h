@@ -2,7 +2,7 @@
 ============================================================
   Fichero: spectrum.h
   Creado: 01-10-2025
-  Ultima Modificacion: dimarts, 7 d’octubre de 2025, 05:37:03
+  Ultima Modificacion: mar 07 oct 2025 12:21:43
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -70,9 +70,9 @@
 #define PROGRAM void program() { //inicio del procedimiento programa
 #define PROCEDURE(A) void A() { //inicio de un procedimiento
 #define END } //fin de cualquier procedimiento
-#define CALL(A) A() //llamada a cualquier procedimiento
+#define CALL(A) A(); //llamada a cualquier procedimiento
 #define GOTO(A) goto label_##A //goto
-#define LABEL(A) label_##A##: //label de un goto
+#define LABEL(A) label_##A: //label de un goto
 #define NUMBER double //definicion de una variable tipo double
 #define BYTE byte //definicion de una variable tipo byte
 #define STRING char* //definicion de una variable tipo char
@@ -84,9 +84,8 @@
 #define NEXT } //final del bucle for
 #define REM(A) //poner anotacion
 #define DO do { //bucle do
-#define WHILE(A) } while(A) //final del do
-
-								
+#define WHILE(A) } while(A); //final del do
+#define PERSISTENT static //va delante de las variables de procedimiento para hacerlas static
 
 // funciones
 
