@@ -2,7 +2,7 @@
 ============================================================
   Fichero: spectrum.h
   Creado: 01-10-2025
-  Ultima Modificacion: lun 06 oct 2025 14:01:45
+  Ultima Modificacion: dimarts, 7 d’octubre de 2025, 05:37:03
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -82,6 +82,9 @@
 #define ENDIF } //final del if
 #define FOR(V,O,C,I) for(V=O;C;I) { //bucle for
 #define NEXT } //final del bucle for
+#define REM(A) //poner anotacion
+#define DO do { //bucle do
+#define WHILE(A) } while(A) //final del do
 
 								
 

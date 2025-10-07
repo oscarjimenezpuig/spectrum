@@ -2,7 +2,7 @@
 ============================================================
   Fichero: prueba.c
   Creado: 06-10-2025
-  Ultima Modificacion: lun 06 oct 2025 14:31:11
+  Ultima Modificacion: dilluns, 6 d’octubre de 2025, 19:58:27
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -11,13 +11,13 @@
 
 #include "spectrum.h"
 
+REM(Ejemplo de programa)
+
 PROCEDURE(Hola)
 	LOCATE(0,0);
 	INK(WHITE);
-	
-	NUMBER n;
-	FOR(n,NORMAL,n<=INVERSE,n=n<<1)
-	MODE(FLIPX);
+	LOCATE(10,10);
+	MODE(RND(0,7));
 	PRINTS("a");
 	MODE(NORMAL);
 END
@@ -27,6 +27,7 @@ PROGRAM
 	IF(INKEY('s')) 
 		STOP;
 	ENDIF
+	PAUSE(1);
 END
 	
 

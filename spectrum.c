@@ -2,7 +2,7 @@
 ============================================================
   Fichero: spectrum.c
   Creado: 03-10-2025
-  Ultima Modificacion: lun 06 oct 2025 14:27:20
+  Ultima Modificacion: dilluns, 6 d’octubre de 2025, 20:09:31
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -125,7 +125,7 @@ static void prt_swap(byte* a,byte* b) {
 static void prt_c_flipx(byte* pmp) {
 	byte* pp=pmp;
 	byte* ppc=pmp+7*SCRBW;
-	for(byte n=0;n<5;n++) {
+	for(byte n=1;n<=4;n++) {
 		prt_swap(pp,ppc);
 		pp+=SCRBW;
 		ppc-=SCRBW;
@@ -138,7 +138,9 @@ static void l_flipy(byte* l) {
 		byte a=(i & *l);
 		byte b=(ci & *l);
 		*l&=~(a|b);
-		*l|=(a*ci)|b*i;
+		byte ta=(a)?1:0;
+		byte tb=(b)?1:0;
+		*l|=(ta*ci)|tb*i;
 	}
 }
 
