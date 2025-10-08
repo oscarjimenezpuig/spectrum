@@ -2,7 +2,7 @@
 ============================================================
   Fichero: spectrum.c
   Creado: 03-10-2025
-  Ultima Modificacion: dilluns, 6 d’octubre de 2025, 20:09:31
+  Ultima Modificacion: mié 08 oct 2025 12:29:37
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -203,6 +203,14 @@ byte s_inkey(char k) {
 		p++;
 	}
 	return 0;
+}
+
+void s_unkey(char k) {
+	byte* p=memory+OKEY;
+	while(p!=memory+OKEY+DKEY) {
+		if(*p==k) *p=0;
+		p++;
+	}
 }
 
 void s_gdu(byte n,byte a,byte b,byte c,byte d,byte e,byte f,byte g,byte h) {

@@ -2,7 +2,7 @@
 ============================================================
   Fichero: spectrum.h
   Creado: 01-10-2025
-  Ultima Modificacion: dimarts, 7 d’octubre de 2025, 18:46:09
+  Ultima Modificacion: mié 08 oct 2025 13:44:37
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -47,53 +47,28 @@
 
 // cabecera funciones
 
-#define POKE(D,V) if ((D)<MEMORY) memory[D]=(V);  //asignar valor a posicion de memoria
-#define PEEK(D) ((D)<MEMORY)?memory[D]:0 //conseguir el valor de la posicion de memoria
-#define MOVE(O,D) poke((D),peek((O))); //mover de una a otra posicion el valor
-#define STOP (memory[OFLG]|=END_SIGN); //para la ejecucion del programa
-#define BACKGROUND(A) s_attrsetall(PPAPER,A); //fondo de toda la pantalla
-#define FOREGROUND(A) s_attrsetall(PINK,A); //tinta de toda la pantalla
-#define PAPER(A) s_attrset(PPAPER,A); //paper de la proxima impresion
-#define INK(A) s_attrset(PINK,A); //tinta de la proxima impresion
-#define ATTRI s_attrget(PINK) //se consigue donde los atributos de tinta
-#define ATTRP s_attrget(PPAPER) //se consigue donde los atributos de paper
-#define MODE(M) s_mode((M)); //almacena el modo de impresion
-#define LOCATE(F,C) s_at((F),(C)); //coloca en la posicion dicha el cursor
-#define PRINTC(B) s_print_c((B)); //impresion de un caracter (0 a 255), M es el modo de impresion (FLIPX,FLIPY,INVERSE)
-#define PRINTN(N) s_print_n((N)); //impresion de cualquier numero
-#define PRINTS(S) s_print_s(S); //impresion de una cadena
-#define CLS s_clear(); //limpia la pantalla (ver s_clear())
-#define INKEY(A) s_inkey(A) //devuelve si se ha tecleado cierta tecla (a-z,0-9,espacio)
-#define GDU(N,A,B,C,D,E,F,G,H) s_gdu((N),(A),(B),(C),(D),(E),(F),(G),(H)); //definicion de un grafico definido por el usuario
-#define RANDOMIZE(A) s_randomize((A)); //introduce la semilla
-#define RND(A,B) s_rnd((A),(B)) //da numero aleatorio del intervalo [A,B]
-#define PAUSE(A) s_pause((A)); //pausa de un determinado tiempo
-#define PROGRAM void program() { //inicio del procedimiento programa
-#define PROCEDURE(A) void A() { //inicio de un procedimiento
-#define END } //fin de cualquier procedimiento
-#define CALL(A) A(); //llamada a cualquier procedimiento
-#define GOTO(A) goto label_##A; //goto
-#define LABEL(A) label_##A: //label de un goto
-#define NUMBER double //definicion de una variable tipo double
-#define BYTE byte //definicion de una variable tipo byte
-#define STRING char* //definicion de una variable tipo char
-#define IF(C) if(C) { //definicion de if
-#define ELSIF(C) } else if(C) {//else if
-#define ELSE } else { //else
-#define ENDIF } //final del if
-#define FOR(V,O,C,I) for(V=O;C;I) { //bucle for
-#define NEXT } //final del bucle for
-#define REM(A) //poner anotacion
-#define DO do { //bucle do
-#define WHILE(A) } while(A); //final del do
-#define VAR(T,V,N) T V = (N); //define una variable y le asigna un valor
-#define SET(V,N) V = (N); //asigna a una variable un valor (persistente o variable)
-#define VEC(T,V,C) T V[(C)]; //creacion de un array de dimension C
-#define COM(V,P,N) V[(P)]=(N); //se asigna a un vector el valor N en la posicion P
-#define PERSISTENT static //va delante de las variables de procedimiento para hacerlas static
-#define INC(A) (A)++; //incrementa un valor
-#define DEC(A) (A)--; //decrementa un valor
-#define NOT(A) A=~(A); //negacion de un valor
+#define poke(D,V) if ((D)<MEMORY) memory[D]=(V)  //asignar valor a posicion de memoria
+#define peek(D) ((D)<MEMORY)?memory[D]:0 //conseguir el valor de la posicion de memoria
+#define move(O,D) poke((D),peek((O))) //mover de una a otra posicion el valor
+#define stop (memory[OFLG]|=END_SIGN) //para la ejecucion del programa
+#define background(A) s_attrsetall(PPAPER,A) //fondo de toda la pantalla
+#define foreground(A) s_attrsetall(PINK,A) //tinta de toda la pantalla
+#define paper(A) s_attrset(PPAPER,A); //paper de la proxima impresion
+#define ink(A) s_attrset(PINK,A); //tinta de la proxima impresion
+#define attri s_attrget(PINK) //se consigue donde los atributos de tinta
+#define attrp s_attrget(PPAPER) //se consigue donde los atributos de paper
+#define mode(M) s_mode((M)); //almacena el modo de impresion
+#define locate(F,C) s_at((F),(C)); //coloca en la posicion dicha el cursor
+#define printc(B) s_print_c((B)); //impresion de un caracter (0 a 255), M es el modo de impresion (FLIPX,FLIPY,INVERSE)
+#define printn(N) s_print_n((N)); //impresion de cualquier numero
+#define prints(S) s_print_s(S); //impresion de una cadena
+#define cls s_clear(); //limpia la pantalla (ver s_clear())
+#define inkey(A) s_inkey(A) //devuelve si se ha tecleado cierta tecla (a-z,0-9,espacio)
+#define unkey(A) s_unkey(A) //desconexion de una tecla
+#define gdu(N,A,B,C,D,E,F,G,H) s_gdu((N),(A),(B),(C),(D),(E),(F),(G),(H)); //definicion de un grafico definido por el usuario
+#define randomize(A) s_randomize((A)); //introduce la semilla
+#define rnd(A,B) s_rnd((A),(B)) //da numero aleatorio del intervalo [A,B]
+#define pause(A) s_pause((A)); //pausa de un determinado tiempo
 
 
 // funciones
@@ -131,6 +106,9 @@ void s_print_s(char* s);
 
 byte s_inkey(char k);
 //comprueba si se esta pulsada una tecla.
+
+void s_unkey(char k);
+//desconecta una tecla
 
 void s_gdu(byte code,byte a,byte b,byte c,byte d,byte e,byte f,byte g,byte h);
 //definicion de un gdu en el caracter c
