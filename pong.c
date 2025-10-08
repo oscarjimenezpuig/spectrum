@@ -2,56 +2,119 @@
 ============================================================
   Fichero: pong.c
   Creado: 07-10-2025
-  Ultima Modificacion: mar 07 oct 2025 12:29:37
+  Ultima Modificacion: dimecres, 8 d’octubre de 2025, 05:28:16
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
 
 #include "spectrum.h"
 
-BYTE px,py,dpx,dpy;
-BYTE jy,oy;
+VAR(BYTE,px,15)
+VAR(BYTE,py,12)
+VAR(BYTE,dpx,1)
+VAR(BYTE,dpy,1)
+VAR(BYTE,jy,9)
+VAR(BYTE,oy,9)
 
 PROCEDURE(Init)
-	PERSISTENT BYTE defined=0;
+	PERSISTENT VAR(BYTE,defined,0)
 	IF(defined) 
 		GOTO(0);
 	ELSE
-		GDU(128,60,126,255,255,255,255,126,60);
-		GDU(129,255,255,255,255,255,255,255,255);
-		BACKGROUND(BLACK);
-		FOREGROUND(WHITE|BRIGHT);
-		defined=1;
+		RANDOMIZE(-1)
+		SET(defined,1)
+		GDU(128,60,126,255,255,255,255,126,60)
+		GDU(129,255,255,255,255,255,255,255,255)
+		BACKGROUND(BLACK)
+		VAR(BYTE,n,0)
+		INK(WHITE|BRIGHT)
+		FOR(n,0,n<32,n++)
+			LOCATE(1,n)
+			PRINTC(129)
+			LOCATE(23,n)
+			PRINTC(129)
+		NEXT
+		FOR(n,1,n<24,n++)
+			IF(n<9 || n>15)
+				LOCATE(n,0)
+				PRINTC(129)
+				LOCATE(n,31)
+				PRINTC(129)
+			ENDIF
+		NEXT
+		INK(BLACK)
+		IF(RND(0,1)) 
+			NOT(dpx)
+		ENDIF
+		IF(RND(0,1))
+			NOT(dpy)
+		ENDIF
 	ENDIF
 	LABEL(0)
 END
 
 PROCEDURE(Moveball)
-	BYTE fx,fy;
-	IF(DPX==1)
-		fx=px+1;
-	ELSIF(DPX==254)
-		fx=px-1;
+	LOCATE(py,px)
+	PRINTC(' ')
+	VAR(BYTE,fx,px)
+	VAR(BYTE,fy,py)
+	IF(dpx==1)
+		INC(fx)
+	ELSIF(dpx==254)
+		DEC(fx)
 	ENDIF
-	IF(DPY==1)
-		fy=py+1;
-	ELSIF(DPY==254)
-		fy=py-1;
+	IF(dpy==1)
+		INC(fy)
+	ELSIF(dpy==254)
+		DEC(fy)
 	ENDIF
-	LOCATE(fx,fy);
-	
-
+	LOCATE(py,fx)
+	IF(ATTRI & WHITE) 
+		SET(dpx,~dpx)
+	ELSE
+		SET(px,fx)
+	ENDIF
+	LOCATE(fy,px)
+	IF(ATTRI & WHITE)
+		SET(dpy,~dpy)
+	ELSE
+		SET(py,fy)
+	ENDIF
+	LOCATE(py,px)
+	INK(WHITE|BRIGHT)
+	PRINTC(128)
+	INK(BLACK)
 END
-	
+
+PROCEDURE(Moveplayer)
+	VAR(BYTE,n,0)
+	INK(BLACK)
+	FOR(n,0,n<4,n++)
+		LOCATE(jy+n,3);
+		PRINTC(' ')
+	NEXT
+	IF(INKEY('a') && jy>2)
+		DEC(jy)
+	ENDIF
+	IF(INKEY('z') && jy+4<23)
+		INC(jy)
+	ENDIF
+	INK(WHITE|BRIGHT)
+	FOR(n,0,n<4,n++)
+		LOCATE(jy+n,3);
+		PRINTC(129)
+	NEXT
+END
 
 PROGRAM
 	CALL(Init)
-	LOCATE(10,10);
-	PRINTC(128);
-	LOCATE(20,10);
-	PRINTC(129);
+	INK(BLACK)
+	CALL(Moveball)
+	CALL(Moveplayer)
 	IF(INKEY('s')) 
 		STOP;
+	ELSE 
+		PAUSE(0.05)
 	ENDIF
 END
 
