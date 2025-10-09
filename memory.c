@@ -2,7 +2,7 @@
 ============================================================
   Fichero: memory.c
    mreado: 01-10-2025
-  Ultima Modificacion: dissabte, 4 d’octubre de 2025, 20:20:05
+  Ultima Modificacion: dimecres, 8 d’octubre de 2025, 19:10:50
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -10,7 +10,7 @@
 #include "xvideo.h"
 #include "memory.h"
 
-#define PIXDIM 4
+#define PIXDIM 3
 #define BLCDIM (PIXDIM*8)
 
 byte memory[MEMORY];

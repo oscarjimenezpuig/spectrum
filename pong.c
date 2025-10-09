@@ -2,7 +2,7 @@
 ============================================================
   Fichero: pong.c
   Creado: 08-10-2025
-  Ultima Modificacion: mié 08 oct 2025 14:32:07
+  Ultima Modificacion: dimecres, 8 d’octubre de 2025, 19:13:30
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -11,6 +11,7 @@
 
 #define PG 128
 #define BG 129
+#define RG 130
 
 #define BV 6
 #define JV 5
@@ -50,7 +51,21 @@ void definicion() {
 		//gdu's
 		gdu(PG,255,255,255,255,255,255,255,255);
 		gdu(BG,60,126,255,255,255,255,126,60);
+		gdu(RG,60,60,60,60,60,60,60,60);
 	}
+}
+
+void random(int init) {
+	const int ONEMORE=1000;
+	static int counter=0;
+	counter=(init)?0:counter;
+	if(counter==ONEMORE) {
+		locate(rnd(2,22),rnd(5,26));
+		ink(WHITE|BRIGHT);
+		printc(PG);
+		ink(BLACK);
+		counter=0;
+	} else counter++;
 }
 
 void mover_pelota(int inicia) {
@@ -101,7 +116,7 @@ int mover_paleta(int* f,int df,int c) {
 	ink(WHITE|BRIGHT);
 	for(int n=0;n<LP;n++) {
 		locate(*f+n,c);
-		printc(PG);
+		printc(RG);
 	}
 	return 1;
 }
@@ -124,13 +139,13 @@ void mover_jugador(int init) {
 
 void mover_ordenador(int init) {
 	static int oy=11;
-	const int OX=28;
+	const int OX=27;
 	if(init) {
 		oy=11;
 		mover_paleta(&oy,0,OX);
 	} else {
-		if(oy+1<py) mover_paleta(&oy,1,OX);
-		else if(oy+1>py) mover_paleta(&oy,-1,OX);
+		if(oy+1<py && oy<16 && px<OX) mover_paleta(&oy,1,OX);
+		else if(oy+1>py && oy>5 && px<OX) mover_paleta(&oy,-1,OX);
 	}
 }
 
@@ -171,6 +186,7 @@ void program() {
 		mj=JV;
 		mo=OV;
 	}
+	random();
 	if(mb==BV) {
 		mover_pelota(ini);
 		mb=0;
