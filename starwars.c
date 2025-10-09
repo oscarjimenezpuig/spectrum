@@ -2,7 +2,7 @@
 ============================================================
   Fichero: starwars.c
   Creado: 08-10-2025
-  Ultima Modificacion: dijous, 9 d’octubre de 2025, 05:32:55
+  Ultima Modificacion: jue 09 oct 2025 11:29:39
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -22,6 +22,7 @@
 
 #define DBKG 7
 #define DSHP 5
+#define DEXP 1
 
 typedef struct {
 	byte id;
@@ -35,7 +36,8 @@ typedef struct {
 Object object[OBJECTS];
 int objects=0;
 
-int fuel=100;
+int fuel=5;
+byte exploded=0;
 
 void gdu_def() {
 	gdu(GTREE1,24,60,124,239,103,126,60,48);
@@ -79,8 +81,8 @@ void init_fuel_def() {
 	Object* o=object+objects;
 	o->id=objects++;
 	o->type=FUEL;
-	o->x=1;
-	o->y=24;
+	o->x=-1;
+	o->y=-1;
 	o->mode=NORMAL;
 	o->color=MAGENTA|BRIGHT;
 	o->gdu=GFUEL;
@@ -89,10 +91,12 @@ void init_fuel_def() {
 void object_draw() {
 	Object* p=object;
 	while(p!=object+objects) {
-		locate(p->y,p->x);
-		ink(p->color);
-		mode(p->mode);
-		printc(p->gdu);
+		if(p->x>=0 && p->x<32 && p->y>0 && p->y<24) {
+			locate(p->y,p->x);
+			ink(p->color);
+			mode(p->mode);
+			printc(p->gdu);
+		}
 		p++;
 	}
 }
@@ -107,35 +111,74 @@ void move_tree(Object* o) {
 	}
 }
 
-void move_ship(Object* o) {
-	int fx=o->x;
-	int fy=o->y;
-	locate(o->y,o->x);
-	ink(BLACK);
-	printc(' ');
-	fuel--;
-	if(inkey('i') && fy>1) fy--;
-	else if(inkey('k') && fy<23) fy++;
-	if(inkey('j')) {
-		fx--;
-		if(fx<0) fx=31;
-	} else if(inkey('l')) {
-		fx++;
-		if(fx==32) fx=0;
+#include <stdio.h> //dbg
+
+void expl_ship(Object* o) {
+	const int MAXAT=32;
+	const int MAXCO=10;
+	static int x,y;
+	static int counter=0;
+	static int init=0;
+	printf("Explosion %i\n",counter);//dbg
+	if(!init) {
+		x=o->x;
+		y=o->y;
+		o->x=o->y=-1;
+		init=1;
 	}
-	o->x=fx;
-	o->y=fy;
+	ink(BLACK);
+	locate(y,x);
+	printc(' ');
+	locate(y,x);
+	if(counter==0) {
+		ink(RED|BRIGHT);
+		printc(GSHIP);
+	} else if(counter>0 && counter<MAXCO) {
+		ink(rnd(1,7));
+		int atoms=(-MAXAT*counter+MAXAT*MAXCO)/9;
+		printf("atoms=%i\n",atoms);//dbg
+		for(int k=0;k<atoms;k++) {
+			int ppx=rnd(0,7);
+			int ppy=rnd(0,7)+y;
+			byte* p=memory+OPIX+ppy*SCRBW+x;
+			*p|=1<<ppx;
+		}
+	}
+	counter++;
+}
+
+void move_ship(Object* o) {
+	if(!exploded) {
+		int fx=o->x;
+		int fy=o->y;
+		locate(o->y,o->x);
+		ink(BLACK);
+		printc(' ');
+		fuel--;
+		if(inkey('i') && fy>1) fy--;
+		else if(inkey('k') && fy<23) fy++;
+		if(inkey('j')) {
+			fx--;
+			if(fx<0) fx=31;
+		} else if(inkey('l')) {
+			fx++;
+			if(fx==32) fx=0;
+		}
+		o->x=fx;
+		o->y=fy;
+	} else expl_ship(o);
 }
 
 void move_fuel(Object* o) {
-	if(o->y==24 && fuel<50) {
+	if(o->y==-1 && fuel<50) {
 		o->y=1;
 		o->x=rnd(0,31);
-	} else if(o->y<24) {
+	} else if(o->y<24 && o->y!=-1) {
 		locate(o->y,o->x);
 		ink(BLACK);
 		printc(' ');
 		o->y=o->y+1;
+		o->y=(o->y==24)?-1:o->y;
 	}
 }
 
@@ -182,7 +225,8 @@ void program() {
 	init();
 	move_objects();
 	object_draw();
-	pause(0.01);
+	if(fuel==0) exploded=1;
+	pause(0.1);
 	if(inkey('s')) stop;
 }
 
