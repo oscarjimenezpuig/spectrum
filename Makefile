@@ -82,6 +82,6 @@ check:
 #MAKEFILE VARIABLE
 
 NAME = spectrum 
-SCRS = xvideo.c memory.c spectrum.c starwars.c
+SCRS = xvideo.c memory.c spectrum.c prueba.c
 INCLUDES = -lX11
 

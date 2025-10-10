@@ -2,7 +2,7 @@
 ============================================================
   Fichero: starwars.c
   Creado: 08-10-2025
-  Ultima Modificacion: jue 09 oct 2025 11:29:39
+  Ultima Modificacion: dijous, 9 d’octubre de 2025, 20:26:53
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -119,7 +119,6 @@ void expl_ship(Object* o) {
 	static int x,y;
 	static int counter=0;
 	static int init=0;
-	printf("Explosion %i\n",counter);//dbg
 	if(!init) {
 		x=o->x;
 		y=o->y;
@@ -134,14 +133,13 @@ void expl_ship(Object* o) {
 		ink(RED|BRIGHT);
 		printc(GSHIP);
 	} else if(counter>0 && counter<MAXCO) {
-		ink(rnd(1,7));
+		ink(YELLOW+BRIGHT);
 		int atoms=(-MAXAT*counter+MAXAT*MAXCO)/9;
-		printf("atoms=%i\n",atoms);//dbg
+		byte* ini=memory+OPIX+y*8*SCRBW+x;
 		for(int k=0;k<atoms;k++) {
 			int ppx=rnd(0,7);
-			int ppy=rnd(0,7)+y;
-			byte* p=memory+OPIX+ppy*SCRBW+x;
-			*p|=1<<ppx;
+			byte* pos=ini+rnd(0,7)*SCRBW;
+			*pos|=1<<ppx;
 		}
 	}
 	counter++;
