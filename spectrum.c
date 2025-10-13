@@ -2,7 +2,7 @@
 ============================================================
   Fichero: spectrum.c
   Creado: 03-10-2025
-  Ultima Modificacion: mié 08 oct 2025 12:29:37
+  Ultima Modificacion: diumenge, 12 d’octubre de 2025, 13:08:45
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -237,3 +237,5 @@ void s_pause(double s) {
 	clock_t lim=clock()+s*CLOCKS_PER_SEC;
 	while(clock()<lim);
 }
+
+

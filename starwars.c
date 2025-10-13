@@ -2,7 +2,7 @@
 ============================================================
   Fichero: starwars.c
   Creado: 08-10-2025
-  Ultima Modificacion: vie 10 oct 2025 11:46:59
+  Ultima Modificacion: diumenge, 12 d’octubre de 2025, 20:02:46
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -53,6 +53,35 @@ void gdu_def() {
 	gdu(GSHIP,24,24,60,36,60,126,255,195);
 	gdu(GFUEL,126,231,239,231,239,255,0,255);
 	gdu(GSTONE,255,255,255,255,255,255,255,255);
+}
+
+void print_tree() {
+	if(rnd(0,1)) ink(GREEN);
+	else ink(GREEN|BRIGHT);
+	mode(rnd(0,3));
+	byte car=(rnd(0,1))?GTREE1:GTREE2;
+	printc(car);
+	mode(NORMAL);
+}
+
+void presentation() {
+	for(int c=0;c<32;c++) {
+		locate(0,c);
+		print_tree();
+		locate(23,c);
+		print_tree();
+	}
+	for(int f=0;f<24;f++) {
+		locate(f,0);
+		print_tree();
+		locate(f,31);
+		print_tree();
+	}
+	show;
+	while(!inkey('s')) {
+		listen;
+	}
+	cls;
 }
 
 void tree_new(int id,int x,int y) {
@@ -123,7 +152,7 @@ void object_colision() {
 			p->x=p->y=-1;
 			if(p->type==FUEL) {
 				p->x=p->y=-1;
-				fuel+=100;
+				fuel+=rnd(100,300);
 			} else exploded=1;
 		}
 		p++;
@@ -202,10 +231,12 @@ void move_ship(Object* o) {
 }
 
 void move_fuel(Object* o) {
+	static int next_fuel=MINF;
 	if(!stop_move) {
-		if(o->y==-1 && fuel<MINF) {
+		if(o->y==-1 && fuel<next_fuel) {
 			o->y=1;
 			o->x=rnd(0,31);
+			next_fuel=rnd(100,300);
 		} else if(o->y<24 && o->y!=-1) {
 			locate(o->y,o->x);
 			ink(BLACK);
@@ -215,8 +246,6 @@ void move_fuel(Object* o) {
 		}
 	}
 }
-
-#include <stdio.h>
 
 void move_objects() {
 	static int newtree=500;
@@ -267,40 +296,43 @@ void marcador() {
 }
 
 void init() {
-	static int doit=0;
-	if(!doit) {
-		randomize(-1);
-		gdu_def();
-		init_tree_def();
-		init_ship_def();
-		init_fuel_def();
-		doit=1;
-	}
+	randomize(-1);
+	gdu_def();
+	presentation();
+	init_tree_def();
+	init_ship_def();
+	init_fuel_def();
 }
 
 void game_over() {
 	const int TIME=100;
-	static int counter=0;
-	locate(12,11);
-	mode(INVERSE);
-	ink(rnd(0,6));
-	paper(WHITE|BRIGHT);
-	prints("GAME OVER");
-	pause(0.05);
-	counter++;
-	if(counter==TIME) stop;
+	int counter=0;
+	while(counter!=TIME) {
+		locate(12,11);
+		mode(INVERSE);
+		ink(rnd(0,6));
+		paper(WHITE|BRIGHT);
+		prints("GAME OVER");
+		show;
+		pause(0.05);
+		counter++;
+	}
+
 }
 
 void program() {
-	static int gameover=0;
-	if(!gameover) {
-		init();
+	int gameover=0;
+	init();
+	while(!gameover) {
+		listen;
 		marcador();
 		move_objects();
 		object_draw();
 		if(fuel==0) exploded=1;
 		pause(0.01);
-		if(inkey('s') || (exploded && finish_explosion)) gameover=1;
-	} else game_over();
+		if(inkey('q') || (exploded && finish_explosion)) gameover=1;
+		show;
+	}
+	game_over();
 }
 

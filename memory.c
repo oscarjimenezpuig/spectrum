@@ -2,7 +2,7 @@
 ============================================================
   Fichero: memory.c
    mreado: 01-10-2025
-  Ultima Modificacion: dimecres, 8 d’octubre de 2025, 19:10:50
+  Ultima Modificacion: diumenge, 12 d’octubre de 2025, 18:49:47
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -12,6 +12,8 @@
 
 #define PIXDIM 3
 #define BLCDIM (PIXDIM*8)
+
+#define FADD 8 //dimension de las direcciones del programa
 
 byte memory[MEMORY];
 
@@ -216,7 +218,7 @@ static void bkg_draw() {
 	}
 }
 
-static void show() {
+void output() {
 	bkg_draw();
 	pix_draw();
 	x_flush();
@@ -236,7 +238,7 @@ static void ks_era(byte val) {
 	}
 }
 
-static void inkey() {
+void input() {
 	KeySym k;
 	int stat=0;
 	if((stat=x_inkey(&k))) {
@@ -248,12 +250,7 @@ static void inkey() {
 int main() {
 	mem_init();
 	scr_init();
-	while((memory[OFLG] & END_SIGN)==0) {
-		show();
-		inkey();
-		program();
-	};
+	program();
 	x_end();
 }
-
 

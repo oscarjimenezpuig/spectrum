@@ -2,7 +2,7 @@
 ============================================================
   Fichero: memory.h
   Creado: 01-10-2025
-  Ultima Modificacion: lun 06 oct 2025 11:25:55
+  Ultima Modificacion: diumenge, 12 d’octubre de 2025, 18:50:50
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -39,9 +39,7 @@
 
 //memoria
 
-#define OFLG 0 //inicio de las banderas
-#define DFLG 1 //dimension de memoria para las banderas 
-#define ODCL (OFLG+DFLG) //inicio de la definicion de colores (4 bytes por colores)
+#define ODCL 0 //inicio de la definicion de colores (4 bytes por colores)
 #define DDCL (COLORS*4) //dimension de los colores guardados
 #define OPIX (ODCL+DDCL) //inicio de la pantalla de pixels
 #define DPIX (SCRPW*SCRPH/8)  //dimension de la pantalla de pixeles
@@ -53,10 +51,10 @@
 #define DKEY KEYS //guarda el keysym de KEYS teclas
 #define OROM (OKEY+DKEY) //origen de la memoria rom (no a disposicion de usuario)
 #define DROM 8 //dimension de la memoria rom
-#define ORAM (OROM+DROM) //origen de la memoria rom (no a disposicion de usuario)
-#define DRAM 1024 //dimension de la memoria rom
+#define ORAM (OROM+DROM) //origen de la ram
+#define DRAM 1024 //dimension de la ram
 
-#define MEMORY (DFLG + DDCL + DPIX + DCOL + DMEM + DKEY + DROM + DRAM) //memoria total
+#define MEMORY (DDCL + DPIX + DCOL + DMEM + DKEY + DROM + DRAM) //memoria total
 
 //memoria colores
 
@@ -69,15 +67,11 @@
 #define BBKG 64
 #define UBKG 128
 
-//flags
-
-#define END_SIGN 1
-#define BOL_FLAG 128 //bandera auxiliar para guardar valores booleanos
-
 //tipos
 
 typedef unsigned char byte;
 typedef unsigned short direction;
+typedef long long int faddress;
 
 //memory
 
@@ -85,10 +79,13 @@ extern byte memory[MEMORY];
 
 //FUNCIONES
 
+void output();
+//se produce muestra de la pantalla
+
+void input();
+//se produce lectura del teclado
+
 void program();
-//dentro de esta funcion se debe poner todo el programa
-
-
-
+//en su interior se mete todo el programa que se ejecutara. Solo parara la ejecucion en el momento que haya la señal de END_SIGN
 
 
