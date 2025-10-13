@@ -81,7 +81,7 @@ check:
 
 #MAKEFILE VARIABLE
 
-NAME = starwars 
-SCRS = xvideo.c memory.c spectrum.c starwars.c
+NAME = ohmummy	
+SCRS = spectrum.c ohmummy.c
 INCLUDES = -lX11
 

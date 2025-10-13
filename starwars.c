@@ -2,7 +2,7 @@
 ============================================================
   Fichero: starwars.c
   Creado: 08-10-2025
-  Ultima Modificacion: dilluns, 13 d’octubre de 2025, 05:23:11
+  Ultima Modificacion: lun 13 oct 2025 13:36:42
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -19,7 +19,8 @@
 #define GTREE2 129
 #define GSHIP 130
 #define GFUEL 131
-#define GSTONE 132
+#define GHOUSE1 132
+#define GHOUSE2 133
 
 #define DBKG 7
 #define DSHP 5
@@ -52,47 +53,48 @@ void gdu_def() {
 	gdu(GTREE2,66,107,127,219,207,126,60,44);
 	gdu(GSHIP,24,24,60,36,60,126,255,195);
 	gdu(GFUEL,126,231,239,231,239,255,0,255);
-	gdu(GSTONE,255,255,255,255,255,255,255,255);
+	gdu(GHOUSE1,24,60,124,254,230,231,195,195);
+	gdu(GHOUSE2,60,60,102,66,66,102,255,255);
+
 }
 
-void print_tree() {
-	if(rnd(0,1)) ink(GREEN);
-	else ink(GREEN|BRIGHT);
-	mode(rnd(0,3));
-	byte car=(rnd(0,1))?GTREE1:GTREE2;
-	printc(car);
-	mode(NORMAL);
-}
-
-void presentation() {
-	for(int c=0;c<32;c++) {
-		locate(0,c);
-		print_tree();:qa
-		locate(23,c);
-		print_tree();
-	}
-	for(int f=0;f<24;f++) {
-		locate(f,0);
-		print_tree();
-		locate(f,31);
-		print_tree();
-	}
-	locate(9,11);
-	paper(BLUE|BRIGHT);
-	ink(WHITE|BRIGHT);
-	prints("STAR WARS");
-	paper(BLACK);
-	ink(RED|BRIGHT);
-	locate(14,12);
-	prints("OJP 2025");
-	show;
-	while(!inkey('s')) {
+void intro() {
+	char* skey[]={"I: up","J: left","L: right","K: down","Q: quit"};
+	byte skeys=5;
+	byte start=0;
+	while(!start) {
+		ink(WHITE|BRIGHT);
+		paper(rnd(0,6)|BRIGHT);
+		locate(1,11);
+		prints("STAR WARS");
+		locate(3,0);
+		ink(RED|BRIGHT);
+		paper(BLACK);
+		prints("(c) Oscar Jimenez Puig 2025");
+		locate(5,0);
+		ink(WHITE|BRIGHT);
+		prints("Cross the forest avoiding all the trees and houses...");
+		locate(7,0);
+		prints("Be careful with the fuel...");
+		ink(YELLOW|BRIGHT);
+		for(byte n=0;n<skeys;n++) {
+			locate(n+9,0);
+			prints(skey[n]);
+		}
+		ink(BLUE|BRIGHT);
+		locate(23,0);
+		prints("Press S to start game");
+		show;
+		pause(0.25);
 		listen;
+		if(inkey('s')) start=1;
 	}
 	cls;
 }
 
 void tree_new(int id,int x,int y) {
+	byte const DEC[]={GTREE1,GTREE2,GHOUSE1,GHOUSE2};
+	byte const INK[]={GREEN,GREEN,RED,RED};
 	Object* o=object+id;
 	o->type=TREE;
 	o->id=id;
@@ -101,15 +103,12 @@ void tree_new(int id,int x,int y) {
 		o->y=(y<0)?rnd(1,23):y;
 	}while(o->x==16 && o->y==22);
 	byte brg=(rnd(0,1))?BRIGHT:NORMAL;
-	o->color=GREEN|brg;
 	o->mode=rnd(0,3);
-	if(score<7500) {
-		o->gdu=(rnd(0,1))?GTREE1:GTREE2;
-	} else {
-		byte dado=rnd(0,2);
-		if(dado==2) o->color=RED|brg;
-		o->gdu=(dado==0)?GTREE1:(dado==1)?GTREE2:GSTONE;
-	}
+	int limit=(score<7500)?1:3;
+	byte val=rnd(0,limit);
+	o->color=INK[val]|brg;
+	o->gdu=DEC[val];
+	o->mode=(val<=1)?rnd(0,3):NORMAL;
 }
 
 void init_tree_def() {
@@ -297,7 +296,7 @@ void marcador() {
 	printn(fuel);
 	locate(0,20);
 	prints("            ");
-	locate(0,20);
+	locate(0,21);
 	ink(CYAN|BRIGHT);
 	prints("SCORE ");
 	printn(score);
@@ -306,14 +305,14 @@ void marcador() {
 void init() {
 	randomize(-1);
 	gdu_def();
-	presentation();
+	intro();
 	init_tree_def();
 	init_ship_def();
 	init_fuel_def();
 }
 
 void game_over() {
-	const int TIME=100;
+	const int TIME=25;
 	int counter=0;
 	while(counter!=TIME) {
 		locate(12,11);
@@ -322,7 +321,7 @@ void game_over() {
 		paper(WHITE|BRIGHT);
 		prints("GAME OVER");
 		show;
-		pause(0.05);
+		pause(0.25);
 		counter++;
 	}
 

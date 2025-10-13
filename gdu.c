@@ -2,7 +2,7 @@
 ============================================================
   Fichero: gdu.c
   Creado: 11-10-2025
-  Ultima Modificacion: diumenge, 12 d’octubre de 2025, 19:40:02
+  Ultima Modificacion: lun 13 oct 2025 13:38:43
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -46,11 +46,44 @@ u1 quit=0;
 
 u1 filas,columnas;
 
+static void intro() {
+	char* skey[]={"I: up","J: left","L: right","K: down","A: mark","S: unmark","N: new","Q: quit"};
+	byte skeys=8;
+	byte start=0;
+	while(!start) {
+		ink(WHITE|BRIGHT);
+		paper(BLACK);
+		locate(1,11);
+		prints("GDU MAKER");
+		locate(3,0);
+		ink(BLACK);
+		paper(WHITE);
+		prints("(c) Oscar Jimenez Puig 2025");
+		locate(6,0);
+		prints("Design GDU from 1x1 to 2x3.");
+		ink(WHITE|BRIGHT);
+		for(byte n=0;n<skeys;n++) {
+			locate(n+9,0);
+			prints(skey[n]);
+		}
+		ink(BLACK);
+		locate(23,0);
+		prints("Press N to start");
+		show;
+		pause(0.25);
+		listen;
+		if(inkey('n')) start=1;
+	}
+	cls;
+}
+
+
 void gdu_init() {
 	gdu(MALLA,255,129,129,129,129,129,129,255);
 	gdu(CURSOR,0,0,60,60,60,60,0,0);
 	background(WHITE);
 	foreground(BLACK);
+	intro();
 	gdu_new();
 }
 
@@ -99,8 +132,8 @@ repeat:
 	}
 	if(answer==-1) goto repeat;
 	gdu(MOSTRA,0,0,0,0,0,0,0,0);
-	for(byte f=0;f<filas;f++) {
-		for(byte c=0;c<columnas;c++) {
+	for(byte f=0;f<filas*8;f++) {
+		for(byte c=0;c<columnas*8;c++) {
 			gdu[f][c]=0;
 		}
 	}
@@ -181,8 +214,15 @@ void gdu_draw() {
 	}
 	ink(BLACK);		
 	//muestra y valores
+	const int VALLIN=18;
+	for(int f=0;f<filas;f++) {
+		for(int pc=0;pc<32;pc++) {
+			locate(f+VALLIN,pc);
+			printc(' ');
+		}
+	}
 	ink(BLACK);
-	int line=18;
+	int line=VALLIN;
 	for(int f=0;f<filas;f++) {
 		for(int c=0;c<columnas;c++) {
 			u1 data[]={0,0,0,0,0,0,0,0};
