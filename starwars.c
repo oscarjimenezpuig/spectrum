@@ -2,7 +2,7 @@
 ============================================================
   Fichero: starwars.c
   Creado: 08-10-2025
-  Ultima Modificacion: diumenge, 12 d’octubre de 2025, 20:02:46
+  Ultima Modificacion: dilluns, 13 d’octubre de 2025, 05:23:11
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -67,7 +67,7 @@ void print_tree() {
 void presentation() {
 	for(int c=0;c<32;c++) {
 		locate(0,c);
-		print_tree();
+		print_tree();:qa
 		locate(23,c);
 		print_tree();
 	}
@@ -77,6 +77,14 @@ void presentation() {
 		locate(f,31);
 		print_tree();
 	}
+	locate(9,11);
+	paper(BLUE|BRIGHT);
+	ink(WHITE|BRIGHT);
+	prints("STAR WARS");
+	paper(BLACK);
+	ink(RED|BRIGHT);
+	locate(14,12);
+	prints("OJP 2025");
 	show;
 	while(!inkey('s')) {
 		listen;
