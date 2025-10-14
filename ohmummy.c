@@ -2,197 +2,152 @@
 ============================================================
   Fichero: ohmummy.c
   Creado: 13-10-2025
-  Ultima Modificacion: dilluns, 13 d’octubre de 2025, 20:34:23
+  Ultima Modificacion: mar 14 oct 2025 14:33:23
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
 
 #include "spectrum.h"
 
-#define GHEROUL 128
-#define GHEROUR 129
-#define GHERODL 130
-#define GHERODR 131
-#define GHERODLM 132
-#define GHERODRM 133
-#define GSTONEA 134
-#define GSTONEB 135
-#define GSTONEC 136
-#define GHUELLA 137
+#define GPLAYER 128
+#define GMUMMY 129
+#define GSTONE 130
+#define GHUELLA 131
+#define GLLAVE 132
+#define GPAPIRO 133
+#define GTUMBA 134
 
-#define COLIN 3
-#define FILIN 0
+#define MFI 23
+#define MCO 31
 
 typedef unsigned char u1;
-typedef signed char s1;
 
-typedef struct {
-	u1 player;
-	int f,c;
-	s1 direction;
-	u1 imagen;
-} Psi;
+u1 malla[MFI][MCO];
 
-Psi player;
+#define VACIO 0
+#define HUELLA 1
+#define PARED 2
+#define LLAVE 4
+#define PAPIRO 8
+#define TUMBA 16
+#define AGUA 32
+#define MOMIA 64
 
 void gdu_init() {
-	gdu(GHEROUL,15,63,255,64,140,128,112,8);
-	gdu(GHEROUR,240,252,255,240,240,112,16,32);
-	gdu(GHERODL,7,8,19,23,16,15,3,7);
-	gdu(GHERODR,192,32,144,144,16,224,64,192);
-	gdu(GHERODRM,192,32,144,144,16,224,128,128);
-	gdu(GSTONEA,255,123,156,239,237,187,59,251);
-	gdu(GSTONEB,251,251,245,191,119,246,237,175);
-	gdu(GSTONEC,239,245,219,55,253,203,189,190);
+	gdu(GPLAYER,60,66,165,129,255,24,36,102);
+	gdu(GMUMMY,153,153,255,36,36,24,36,102);
+	gdu(GSTONE,0,126,86,106,86,106,126,0);
 	gdu(GHUELLA,0,0,0,24,24,0,0,0);
+	gdu(GLLAVE,56,8,56,8,28,34,34,28);
+	gdu(GPAPIRO,255,129,189,128,189,129,189,255);
+	gdu(GTUMBA,24,36,24,126,126,24,24,24);
 }
 
-static void player_init() {
-	player=(Psi){1,FILIN+1,COLIN+1,1,1};
-}
-
-static void stoneprint(byte f,byte c) {
-	byte brg=(rnd(0,1))?BRIGHT:NORMAL;
-	ink(RED|brg);
-	if(rnd(0,4)==0) paper(GREEN);
-	else paper(BLACK);
-	locate(f,c);
-	mode(rnd(0,3));
-	byte sgdu=rnd(GSTONEA,GSTONEC);
-	printc(sgdu);
-
-}
-
-void scenario() {
-	for(byte f=FILIN;f<FILIN+24;f++) {
-		stoneprint(f,COLIN);
-		stoneprint(f,31);
+void malla_mapa_init() {
+	for(u1 f=0;f<MFI;f++) {
+		for(u1 c=0;c<MCO;c++) {
+			if(f==0 || f==MFI-1 || c==0 || c==MCO-1) malla[f][c]=PARED;
+			else if((f%4)==1 || (c%4)==1) malla[f][c]=VACIO;
+			else malla[f][c]=PARED|AGUA;
+		}
 	}
-	for(byte c=COLIN;c<COLIN+29;c++) {
-		stoneprint(0,c);
-		stoneprint(23,c);
-	}
-	for(byte pi=0;pi<5;pi++) {
-		for(byte pc=0;pc<5;pc++) {
-			int fi=pi*4+3;
-			int ci=pc*5+COLIN+3;
-			for(int f=fi;f<fi+2;f++) {
-				for(int c=ci;c<ci+3;c++) {
-					stoneprint(f,c);
-				}
+	u1 flag[]={LLAVE,PAPIRO,TUMBA,MOMIA};
+	int bef=(MFI-3)/4;
+	int bec=(MCO-3)/4;
+	for(int n=0;n<4;n++) {
+		while(1) {
+			int fe=rnd(0,bef-1);
+			int ce=rnd(0,bec-1);
+			int f=3+4*fe;
+			int c=3+4*ce;
+			if(malla[f][c]==(PARED|AGUA)) {
+				malla[f][c]|=flag[n];
+				break;
 			}
 		}
 	}
-	ink(BLACK);
-	paper(BLACK);
 }
 
-void player_draw() {
-	int f=player.f;
-	int c=player.c;
-	ink(WHITE|BRIGHT);
-	if(player.direction==-1) {
-		mode(NORMAL);
-		locate(f,c);
-		printc(GHEROUL);
-		printc(GHEROUR);
-		locate(f+1,c);
-		printc(GHERODL);
-		if(player.imagen==0) printc(GHERODRM);
-		else printc(GHERODR);
-	} else {
-		locate(f,c);
-		mode(FLIPY);
-		printc(GHEROUR);
-		printc(GHEROUL);
-		locate(f+1,c);
-		if(player.imagen==0) printc(GHERODRM);
-		else printc(GHERODR);
-		printc(GHERODL);
-		mode(NORMAL);
-	}
+static void pared_prt() {
+	paper(YELLOW);
+	ink(RED);
+	printc(GSTONE);
 }
 
-#include <stdio.h> //dbg
+static void llave_prt() {
+	ink(MAGENTA|BRIGHT);
+	printc(GLLAVE);
+}
 
-static int chk_place(s1 df,s1 dc) {
-	u1 obstaculo=0;
-	int f=player.f;
-	int c=player.c;
-	int chk[]={0,0,0,0};
-	if(df==1) {
-		chk[0]=f+2;
-		chk[1]=c;
-		chk[2]=f+2;
-		chk[3]=c+1;
-	} else if(df==-1) {
-		chk[0]=f-1;
-		chk[1]=c;
-		chk[2]=f-1;
-		chk[3]=c;
-	}
-	if(dc==1) {
-		chk[0]=f;
-		chk[1]=c+2;
-		chk[2]=f+1;
-		chk[3]=c+2;
-	} else if(dc==-1) {
-		chk[0]=f;
-		chk[1]=c-1;
-		chk[2]=f+1;
-		chk[3]=c-1;
-	}
-	for(int n=0;n<2;n++) {
-		//continuar la deteccion de atributos
-
-
-
-int player_move(s1 df,s1 dc) {
-	int ff=player.f+df;
-	int fc=player.c+dc;
-	locate(ff,fc);
-	byte color=attri;
-	color &=(~BRIGHT);
-	locate(ff+1,fc);
-	color+=(attri & (~BRIGHT));
-	printf("color=%i\n",color);//dbg
-	if(color) return 0;
+static void tumba_prt() {
 	ink(YELLOW|BRIGHT);
-	locate(player.f,player.c);
-	printc(GHUELLA);
-	locate(player.f+1,player.c);
-	printc(GHUELLA);
-	ink(BLACK);
-	player.f=ff;
-	player.c=fc;
-	player.imagen=(player.imagen==0)?1:0;
-	return 0;
+	printc(GTUMBA);
 }
 
-void player_act() {
-	int move=0;
-	if(inkey('i')) move=player_move(-1,0);
-	else if(inkey('k')) move=player_move(1,0);
-	if(inkey('j')) {
-		player.direction=-1;
-		player_move(0,-1);
-	} else if(inkey('l')) {
-		player.direction=1;
-		player_move(0,1);
+static void papiro_prt() {
+	ink(WHITE|BRIGHT);
+	printc(GPAPIRO);
+}
+
+#include <stdio.h>
+
+void open_block(int f,int c) {
+	//abre el bloque que tiene centro esta fila y esta columna
+	u1 extra=malla[f][c]&~(PARED|AGUA);
+	printf("%i,%i->%i\n",f,c,extra);//dbg
+	u1 papel=BLUE;
+	if(extra==MOMIA) {
+		papel=BLACK;
+	}
+	for(int cf=f-1;cf<=f+1;cf++) {
+		for(int cc=c-1;cc<=c+1;cc++) {
+			locate(cf,cc);
+			malla[cf][cc]&=(~PARED);
+			if(papel==BLACK) malla[cf][cc]&=(~AGUA);
+			paper(papel);
+			if(cf==f && cc==c) {
+				switch(extra) {
+					case LLAVE:
+						llave_prt();
+						break;
+					case PAPIRO:
+						papiro_prt();
+						break;
+					case TUMBA:
+						tumba_prt();
+						break;
+					case MOMIA:
+						//este no es definitivo
+						//momia_print();
+						break;
+				}
+			} else printc(' ');
+		}
+	}
+}
+
+void mapa_draw() {
+	for(int f=0;f<MFI;f++) {
+		for(int c=0;c<MCO;c++) {
+			u1 val=malla[f][c];
+			locate(f,c);
+			if(val & PARED) pared_prt();
+		}
 	}
 }
 
 void program() {
-	background(BLACK);
-	foreground(BLACK);
 	gdu_init();
-	player_init();
-	scenario();
-begin:
-	player_draw();
+	malla_mapa_init();
+	mapa_draw();
 	show;
-	listen;
-	player_act();
-	if(inkey('q')==0) goto begin; 
+	pause(2);
+	for(int f=0;f<5;f++) {
+		for(int c=0;c<7;c++) {
+			open_block(3+4*f,3+4*c);
+		}
+	}
+	show;
+	while(inkey('q')==0) listen;
 }
-	
+
