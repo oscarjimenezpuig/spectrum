@@ -2,7 +2,7 @@
 ============================================================
   Fichero: ohmummy.c
   Creado: 13-10-2025
-  Ultima Modificacion: dimecres, 15 d’octubre de 2025, 05:31:31
+  Ultima Modificacion: mié 15 oct 2025 12:32:27
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -21,6 +21,7 @@
 #define MCO 31
 
 typedef unsigned char u1;
+typedef signed char s1;
 
 #define VACIO 0
 #define HUELLA 1
@@ -39,6 +40,9 @@ typedef struct {
 	int f,c;
 	int delay;
 	int counter_delay;
+	int df,dc;
+	u1 vivo;
+	
 } Psi;
 
 typedef struct {
@@ -70,7 +74,7 @@ static void momia_posicion_random(int* f,int* c) {
 	do {
 		*f=rnd(MFI/2,MFI-1);
 		*c=rnd(MCO/2,MCO-1);
-	} while (malla[f][c]==VACIO);
+	} while (malla[*f][*c]!=VACIO);
 }
 
 static void malla_mapa_init() {
@@ -99,19 +103,21 @@ static void malla_mapa_init() {
 }
 
 static void player_init() {
-	player=(Psi){GPLAYER,WHITE|BRIGHT,1,1,5,5};
+	player=(Psi){GPLAYER,WHITE|BRIGHT,1,1,5,5,0,0,1};
 }
 
 static void mummie_init(u1 f,u1 c) {
-	if(mummie<MUMMIES) {
-		u1 delay=rnd(2,8);
-		mummie[mummies++]=(Psi){GMUMMY,GREEN|LIGHT,f,c,delay,delay};
+	if(mummies<MUMMIES) {
+		u1 delay=rnd(7,10);
+		mummie[mummies++]=(Psi){GMUMMY,GREEN|BRIGHT,f,c,delay,delay,0,0,1};
 	}
 }
 
-void nivel_init() {
-	nivel.numero++;
-	nivel.momias++;
+void nivel_init(u1 incrementa) {
+	if(incrementa) {
+		nivel.numero++;
+		nivel.momias++;
+	}
 	nivel.papiro=nivel.tumba=nivel.llave=0;
 	malla_mapa_init();
 	player_init();
@@ -132,22 +138,37 @@ static void pared_prt() {
 static void llave_prt() {
 	ink(MAGENTA|BRIGHT);
 	printc(GLLAVE);
+	nivel.llave=1;
 }
 
 static void tumba_prt() {
 	ink(YELLOW|BRIGHT);
 	printc(GTUMBA);
+	nivel.tumba=1;
 }
 
 static void papiro_prt() {
 	ink(WHITE|BRIGHT);
 	printc(GPAPIRO);
+	nivel.papiro=1;
 }
 
 static void agua_prt() {
 	paper(BLUE);
 	printc(' ');
 	paper(BLACK);
+}
+
+static void huella_prt() {
+	paper(BLACK);
+	ink(WHITE);
+	printc(GHUELLA);
+}
+
+static void vacio_prt() {
+	paper(BLACK);
+	ink(BLACK);
+	printc(' ');
 }
 
 void open_block(int f,int c) {
@@ -175,8 +196,7 @@ void open_block(int f,int c) {
 						tumba_prt();
 						break;
 					case MOMIA:
-						//este no es definitivo
-						//momia_print();
+						mummie_init(cf,cc);
 						break;
 					default:
 						agua_prt();
@@ -238,37 +258,96 @@ void psi_draw(Psi p) {
 
 void player_act() {
 	listen;
-	if(player.counter_delay==player.delay) {
-		int ff=player.f;
-		int cf=player.c;
-		if(inkey('i')) ff--;
-		else if(inkey('k')) ff++;
-		else if(inkey('j')) cf--;
-		else if(inkey('l')) cf++;
-		int val=malla[ff][cf];
-		if((val & (AGUA|PARED))==0) {
-			malla[player.f][player.c]=HUELLA;
-			locate(player.f,player.c);
-			ink(WHITE);
-			printc(GHUELLA);
-			player.f=ff;
-			player.c=cf;
+	if(player.vivo) {
+		if(player.counter_delay==player.delay) {
+			int ff=player.f;
+			int cf=player.c;
+			if(inkey('i')) ff--;
+			else if(inkey('k')) ff++;
+			if(inkey('j')) cf--;
+			else if(inkey('l')) cf++;
+			int val=malla[ff][cf];
+			if((val & (AGUA|PARED))==0) {
+				malla[player.f][player.c]=HUELLA;
+				locate(player.f,player.c);
+				huella_prt();
+				player.f=ff;
+				player.c=cf;
+			}
+			player.counter_delay=0;
+			detect_close_blocks();
+		} else player.counter_delay++;
+		psi_draw(player);
+	}
+}
+
+static void momia_act(Psi* p) {
+	if(p->counter_delay==p->delay) {
+		if(p->df==p->f && p->dc==p->c) {
+			p->df=player.f;
+			p->dc=player.c;
 		}
-		player.counter_delay=0;
-		detect_close_blocks();
-	} else player.counter_delay++;
+	begin:
+		s1 dirf=(p->df>p->f)?1:(p->df<p->f)?-1:0;
+		s1 dirc=(p->dc>p->c)?1:(p->dc<p->c)?-1:0;
+		int ff=p->f+dirf;
+		if(malla[ff][p->c]>HUELLA) dirf=0;
+		int fc=p->c+dirc;
+		if(malla[p->f][fc]>HUELLA) dirc=0;
+		if(dirf!=0 && dirc!=0) {
+			if(rnd(0,1)) dirf=0;
+			else dirc=0;
+		} else if(dirf==0 && dirc==0) {
+			p->df=rnd(0,MFI-1);
+			p->dc=rnd(0,MCO-1);
+			goto begin;
+		}
+		u1 f=p->f;
+		u1 c=p->c;
+		locate(f,c);
+		if(malla[f][c]==HUELLA) huella_prt();
+		else vacio_prt();
+		f=p->f+=dirf;
+		c=p->c+=dirc;
+		psi_draw(*p);	
+		p->counter_delay=0;
+	} else p->counter_delay++;
+}
+
+void momias_act() {
+	for(int k=0;k<mummies;k++) {
+		Psi* m=mummie+k;
+		if(m->vivo) momia_act(m);
+	}
+}
+
+void encuentros() {
+	for(int k=0;k<mummies;k++) {
+		Psi* m=mummie+k;
+		if(m->f==player.f && m->c==player.c) {
+			if(nivel.papiro) {
+				//kill a mummy
+				m->vivo=0;
+			} else {
+				//kill player
+				player.vivo=0;
+				break;
+			}
+		}
+	}
 }
 
 void program() {
 	gdu_init();
-	player_init();
-	malla_mapa_init();
+	nivel_init(1);
 	mapa_draw();
 begin:
-	player_act(player);
-	psi_draw(player);
+	player_act();
+	encuentros();
+	momias_act();
+	encuentros();
 	show;
-	pause(0.01);
+	pause(0.005);
 	while(inkey('q')==0) goto begin;
 }
 
