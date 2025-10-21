@@ -2,7 +2,7 @@
 ============================================================
   Fichero: ohmummy.c
   Creado: 13-10-2025
-  Ultima Modificacion: dijous, 16 d’octubre de 2025, 05:26:29
+  Ultima Modificacion: dimarts, 21 d’octubre de 2025, 18:13:06
   oSCAR jIMENEZ pUIG                                       
 ============================================================
 */
@@ -86,6 +86,51 @@ void gdu_init() {
 	gdu(GTUMBA,24,36,24,126,126,24,24,24);
 }
 
+void intro() {
+	char* skey[]={"I: up","J: left","L: right","K: down","S: start","Q: quit"};
+	byte skeys=6;
+	ink(BLACK);
+	paper(YELLOW|BRIGHT);
+	locate(1,11);
+	prints("OH MUMMY!!");
+	ink(RED|BRIGHT);
+	paper(BLACK);
+	locate(3,0);
+	prints("(c) Oscar Jimenez Puig 2025");
+	locate(5,0);
+	ink(WHITE|BRIGHT);
+	prints("Find the tomb ");
+	ink(YELLOW);	
+	printc(GTUMBA);
+	ink(WHITE|BRIGHT);
+	prints(" and the key ");
+	ink(MAGENTA);
+	printc(GLLAVE);
+	ink(WHITE|BRIGHT);
+	prints(" to pass the pyramid...");
+	locate(7,0);
+	prints("You have to avoid the mumies ");
+	ink(GREEN|BRIGHT);
+	printc(GMUMMY);
+	ink(WHITE|BRIGHT);
+	locate(8,0);
+	prints("or kill it if you find the ");
+	locate(9,0);
+	prints("scroll ");
+	printc(GPAPIRO);
+	ink(CYAN|BRIGHT);
+	for(byte n=0;n<skeys;n++) {
+		locate(n+11,0);
+		prints(skey[n]);
+	}
+	ink(BLUE|BRIGHT);
+	locate(23,0);
+	prints("Press S to start game");
+	show;
+	pause(0.25);
+	while(inkey('s')==0) listen;
+}
+	
 static void momia_posicion_random(int* f,int* c) {
 	do {
 		*f=rnd(MFI/2,MFI-1);
@@ -444,8 +489,25 @@ void puerta() {
 	if(player.c==CP && player.f==FP) nivel_init(1);
 }
 
+void game_over() {
+	const int TIME=25;
+	int counter=0;
+	while(counter!=TIME) {
+		locate(12,11);
+		mode(INVERSE);
+		ink(rnd(0,6));
+		paper(WHITE|BRIGHT);
+		prints("GAME OVER");
+		show;
+		pause(0.25);
+		counter++;
+	}
+
+}
+
 void program() {
 	gdu_init();
+	intro();
 	nivel_init(1);
 begin:
 	player_act();
@@ -459,5 +521,6 @@ begin:
 	pause(0.01);
 	if (inkey('q')==0) goto begin;
 end:
+	game_over();
 }
 
